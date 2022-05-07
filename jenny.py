@@ -7,6 +7,8 @@ import markdown
 if not os.path.exists( 'public' ):
     os.mkdir( 'public' )
 
+template = open('template.html', 'r').read()
+
 for f in glob.iglob( 'src/*.md' ):
     with open( f, 'r' ) as file:
         raw = file.read()
@@ -16,15 +18,5 @@ for f in glob.iglob( 'src/*.md' ):
     destination = os.path.join( "public", os.path.splitext( file_name )[ 0 ] + ".html" )
 
     with open( destination, 'w' ) as file:
-                file.write(r'''<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>My Great Site</title>
-</head>
-<body>
-''')
-                file.write(html)
-                file.write(r'''
-</body>
-</html>''')
+        template = template.replace("{{content}}", html)
+        file.write(template)
