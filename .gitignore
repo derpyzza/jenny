@@ -1,3 +1,5 @@
-proj.txt
-public/
-src/
+*
+!.gitignore
+!jenny.py
+!README.md
+!LICENSE
