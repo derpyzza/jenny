@@ -1,0 +1,121 @@
+:root {
+  --background: #2e2e3f;
+}
+
+* {
+box-sizing: inherit;
+}
+/* raw elements */
+body {
+  color: #1d1d1d;
+  background: #f7f7f7; 
+  padding: 0;
+  margin: 0;
+  font-family: 'Fira Code';
+}
+aside {
+  color: #6f6f6f;
+  position: absolute;
+  right: 0;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  width: 9rem;
+}
+code {
+  display: block;
+  color: white;
+  background: #1d1d1d;
+  font-size: 1rem;
+  padding: 1rem;
+  padding-right: 0;
+  border-radius: 10px;
+}
+h2 {
+  margin-bottom: -0.7rem;
+}
+a {
+  color: #1d1d1d;
+  /* background: #1d1d1d; */
+  /* padding-left: 3px; */
+  /* padding-right: 3px; */
+  text-decoration: none;
+}
+blockquote {
+  padding: 0.7rem;
+  margin-left: 0;
+  border-left: 0.5rem solid rgb(191, 124, 207);;
+  color: #f7f7f7;
+  background: #1b1b1b;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+.main {
+  /* background: var(--background); */
+  position: relative;
+  display: block;
+  border-radius: 10px;
+  max-width: calc(70ch + 10.5rem);
+  padding-right: 10.5rem;
+  margin: auto;
+}
+.titlebox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.titledata {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.date {
+  color:#535353;
+}
+.title {
+  color: rgb(157, 71, 179);
+  margin: 5px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  border-top: solid 1px rgb(191, 124, 207);
+  padding-top: 5px;
+}
+
+
+/* index */
+.icon {
+  width: 150px;
+  height: 150px;
+  clip-path: circle();
+  /* border-radius: 50%; */
+  object-fit: cover;
+  object-position: center;
+}
+.posts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.post {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 80%;
+  height: 100px;
+  padding: 20px;
+}
+.post:hover {
+  background: #E8E8E8;
+}
+.post-title {
+  display: flex;
+  justify-content: space-between;
+}
