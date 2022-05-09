@@ -3,12 +3,15 @@
 import os
 import glob
 import markdown
+import commonmark
 
 if not os.path.exists( 'public' ):
     os.mkdir( 'public' )
 
 template = open('template.html', 'r').read()
-title = ''
+title:str
+date:str
+subtitle:str
 content = ''
 
 for f in glob.iglob( 'src/*.md' ):
@@ -25,11 +28,15 @@ for f in glob.iglob( 'src/*.md' ):
                 if command == 'title':
                     title = args
                     print(title)
+                elif command == 'date':
+                    date = args
+                elif command == 'subtitle':
+                    subtitle = args
             else:
                 content += line
         #print(content)
         raw = file.read()
-        html = markdown.markdown( content )
+        html = commonmark.commonmark( content )
 
     file_name = os.path.basename( f )
     destination = os.path.join( "public", os.path.splitext( file_name )[ 0 ] + ".html" )
@@ -37,4 +44,6 @@ for f in glob.iglob( 'src/*.md' ):
     with open( destination, 'w' ) as file:
         template = template.replace("{{content}}", html)
         template = template.replace("{{title}}", title)
+        template = template.replace("{{date}}", date)
+        template = template.replace("{{subtitle}}", subtitle)
         file.write(template)
