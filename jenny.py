@@ -45,7 +45,7 @@ for f in glob.iglob( 'src/*.md' ):
             else:
                 content += line
         raw = file.read()
-        html = commonmark.commonmark( content )
+        html = markdown.markdown( content, extensions=[ 'extra', 'codehilite'] )
         # print( "file: " + f + " content: \n" + content )
 
     file_name = os.path.basename( f )
