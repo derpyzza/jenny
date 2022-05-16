@@ -42,6 +42,8 @@ for f in glob.iglob( 'src/*.md' ):
                     date = args
                 elif command == 'subtitle':
                     subtitle = args
+            elif stripped.startswith('\\'):
+                content += stripped[2:]
             else:
                 content += line
         raw = file.read()
