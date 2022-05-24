@@ -13,7 +13,6 @@ import commonmark
 # DONE write html out using the template
 # DOING generate an index using all the title ids
 
-ids = []
 def preprocess_file(file):
         # preprocess the file for metadata. 
         # metadata in this implementation just starts with a "$" symbol, followed by a command name and command args
@@ -62,6 +61,8 @@ def format_file(post, template):
     return template
 
 def generate_index(post, ids):
+    if ids == []:
+        return
     index = "<div class=\"index\">\n<h3>Index</h3>\n<ul>"
     for id in ids:
         print(id["id"])
@@ -76,6 +77,7 @@ if not os.path.exists( 'public' ):
 
 for f in glob.iglob( 'src/*.md' ):
     post = {}
+    ids = []
     template = open('assets/template.html', 'r').read()
     with open( f, 'r' ) as file:
         post = preprocess_file(file)
