@@ -5,13 +5,15 @@ import glob
 import markdown
 import commonmark
 
-# DOING read config files
+# TODO read config files
     # what kinda configs?? idk
 # DONE read in markdown files
 # DONE read in template file
 # DONE convert markdown to html
 # DONE write html out using the template
+# DOING generate an index using all the title ids
 
+ids = []
 def preprocess_file(file):
         # preprocess the file for metadata. 
         # metadata in this implementation just starts with a "$" symbol, followed by a command name and command args
@@ -42,8 +44,11 @@ def preprocess_file(file):
         elif stripped.startswith('\\'):
             content += stripped[2:]
         elif stripped.startswith('##'):
-            id = stripped.rstrip('\n').lstrip('##').lstrip(' ')
-            content += "<h2 id=\"" + id.replace(" ", "-").lower() + "\">" + id + "</h2>"
+            data = stripped.rstrip('\n').lstrip('##').lstrip(' ')
+            id = data.replace(" ", "-").lower()
+            content += "<h2 id=\"" + id + "\">" + data + "</h2>"
+            ids.append({"id": id, "data": data})
+
         else:
             content += line
     return {"content": content, "title": title, "subtitle": subtitle, "date": date}
@@ -56,6 +61,14 @@ def format_file(post, template):
     template = template.replace("{{date}}", post['date'])
     return template
 
+def generate_index(post, ids):
+    index = "<div class=\"index\">\n<h3>Index</h3>\n<ul>"
+    for id in ids:
+        index += "<li><a href=\"" + id["id"] + "\">" + id["data"] + "</a></li>\n"
+    index += "</ul></div>"
+    post["content"] = index + post["content"]
+    return post
+
 posts = []
 if not os.path.exists( 'public' ):
     os.mkdir( 'public' )
@@ -65,6 +78,7 @@ for f in glob.iglob( 'src/*.md' ):
     template = open('assets/template.html', 'r').read()
     with open( f, 'r' ) as file:
         post = preprocess_file(file)
+        post = generate_index(post, ids)
         post['content'] = markdown.markdown( post["content"], extensions=[ 'extra', 'codehilite', 'toc', 'superscript'] )
 
     file_name = os.path.basename( f )
