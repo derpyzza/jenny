@@ -62,7 +62,7 @@ def format_file(post, template):
 
 def generate_index(post, ids):
     if ids == []:
-        return
+        return post
     index = "<div class=\"index\">\n<h3>Index</h3>\n<ul>"
     for id in ids:
         print(id["id"])
