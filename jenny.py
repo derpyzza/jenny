@@ -64,7 +64,8 @@ def format_file(post, template):
 def generate_index(post, ids):
     index = "<div class=\"index\">\n<h3>Index</h3>\n<ul>"
     for id in ids:
-        index += "<li><a href=\"" + id["id"] + "\">" + id["data"] + "</a></li>\n"
+        print(id["id"])
+        index += "<li><a href=\"#" + id["id"] + "\">" + id["data"] + "</a></li>\n"
     index += "</ul></div>"
     post["content"] = index + post["content"]
     return post
