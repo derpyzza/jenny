@@ -1,7 +1,6 @@
 package main
 
 import (
-	// stdlib
 	"bufio"
 	"fmt"
 	"os"
@@ -16,7 +15,6 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-// source directory, should contain markdown (.md) files :)
 const SRCDIR string = "./src/"
 const TEMPDIR string = "./templates/"
 const PUBDIR string = "./public/"
@@ -28,6 +26,7 @@ func report(err error) bool {
 	}
 	return false
 }
+
 func fatal(err error) bool {
 	if err != nil {
 		log.Fatal(err)
@@ -69,7 +68,6 @@ func GetSourceFiles() []string {
 	for _, file := range files {
 		log.Info("Found", "file", file.Name())
 		if filepath.Ext(file.Name()) == ".md" {
-			// fmt.Println("Correct format!");
 			fileName := strings.TrimRight(file.Name(), ".md")
 			srcFiles = append(srcFiles, fileName)
 		}
@@ -88,6 +86,8 @@ relevant data has been extracted from the file.
 metadata begins with an "@" symbol, followed immediately
 by the key name, followed by a "<-" marker, and then everything
 after that until a newline is accepted as the value.
+
+TODO: replace pathetic metadata parsing with yaml header
 */
 func PreprocessFile(file string) Post {
 
@@ -139,9 +139,6 @@ func PreprocessFile(file string) Post {
 	return post
 }
 
-/*
-Takes in a file,
-*/
 func FormatContent(content string) string {
 
 	log.Info("Converting to markdown")
@@ -174,14 +171,10 @@ func TemplateFile(post Post, template string) (string, error) {
 	postFile = strings.Replace(postFile, "{{title}}", post.title, 1)
 	postFile = strings.Replace(postFile, "{{subtitle}}", post.subtitle, 1)
 	postFile = strings.Replace(postFile, "{{date}}", post.date, 1)
-	postFile = strings.TrimRight(postFile, "\n") // remove trailing new line.
+	postFile = strings.TrimRight(postFile, "\n")
 
 	return postFile, err
 }
-
-// func SortPosts(posts []map[string]indexData) []map[string]indexData {
-// dates := posts[0]
-// }
 
 // meat and bones of the app;
 func Jennyrate() {
@@ -191,8 +184,6 @@ func Jennyrate() {
 
 	for _, f := range files {
 		log.Info("Jennyrating ", "file", f)
-
-		// postData := make(map[string]indexData);
 
 		post := PreprocessFile(f)
 		post.content = FormatContent(post.content)
@@ -217,8 +208,7 @@ func Jennyrate() {
 		}
 		log.Info("Wrote", "file", path+"!")
 
-		posts[post.date] = indexData{slug: htmlf + ".html", title: post.title, subtitle: post.subtitle}
-		// posts = append(posts, postData);
+		posts[post.date] = indexData{slug: PUBDIR + htmlf + ".html", title: post.title, subtitle: post.subtitle}
 	}
 
 	var indices []string
@@ -229,16 +219,24 @@ func Jennyrate() {
 		dates = append(dates, k)
 	}
 
-	sort.Strings(dates)
+	sort.Strings(dates)	
+
+	path := TEMPDIR + "post-card.html"
+	templateRaw, err := os.ReadFile(path)
 
 	for _, v := range dates {
 		post := posts[v]
-		str := `
-		<div>
-		<a href="` + PUBDIR + post.slug + `">
-		` + "<h1>" + post.title + "</h1>" + `
-		<h2>` + post.subtitle + "</h2>" + `
-		<h2>` + v + "</h2>" + "\n</a></div>"
+		str := string(templateRaw[:])
+		str = strings.Replace(str, "{{slug}}", post.slug, 1)
+		str = strings.Replace(str, "{{title}}", post.title, 1)
+		str = strings.Replace(str, "{{subtitle}}", post.subtitle, 1)
+		str = strings.Replace(str, "{{date}}", v, 1)
+		// str := `
+		// <div>
+		// <a href="` + PUBDIR + post.slug + `">
+		// ` + "<h1>" + post.title + "</h1>" + `
+		// <h2>` + post.subtitle + "</h2>" + `
+		// <h2>` + v + "</h2>" + "\n</a></div>"
 		indices = append(indices, str)
 	}
 
@@ -265,11 +263,28 @@ func Jennyrate() {
 	// log.Info("Wrote", "file", path+"!")
 }
 
-func main() {
-	log.Info("Initialized jenny")
-	Jennyrate()
+const helpMessage = `
+Welcome to jenny!
+version: 0.0.1
 
-	// dates := []string {"24-05-23", "23-01-01", "19-12-01"}
-	// sort.Strings(dates);
-	// fmt.Println(dates);
+this is help text :), use 'jenny build' to build your site!`;
+
+
+func main() {
+	for _, s := range os.Args[1:] {
+		switch s {
+			case "build":
+				fmt.Println("Building...")
+				Jennyrate()
+			case "help":
+				fmt.Println(helpMessage)
+
+			default:
+				fmt.Println("no commands found")
+		}
+	}
+	// buildPtr := flag.Bool("v", false, "verbose");
+	// flag.Parse();
+	// fmt.Println("verbose: ", *buildPtr)
+	// defer Jennyrate()
 }

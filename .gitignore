@@ -2,4 +2,6 @@ py/
 src/
 templates/
 public/
+assets/
+index.html
 other.md
