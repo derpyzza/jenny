@@ -43,10 +43,10 @@ type Post struct {
 }
 
 type indexData struct {
-	// date string;
-	slug     string
-	title    string
-	subtitle string
+	slug     	string
+	title    	string
+	subtitle 	string
+	date 			string
 }
 
 /*
@@ -178,9 +178,9 @@ func TemplateFile(post Post, template string) (string, error) {
 
 // meat and bones of the app;
 func Jennyrate() {
-	files := GetSourceFiles()
 
-	posts := make(map[string]indexData)
+	files := GetSourceFiles()
+	posts := []indexData{}
 
 	for _, f := range files {
 		log.Info("Jennyrating ", "file", f)
@@ -206,43 +206,32 @@ func Jennyrate() {
 		if report(err) {
 			continue
 		}
-		log.Info("Wrote", "file", path+"!")
+		log.Info("Wrote", "file", path + "!")
 
-		posts[post.date] = indexData{slug: PUBDIR + htmlf + ".html", title: post.title, subtitle: post.subtitle}
+		posts = append(posts, indexData{date: post.date, slug: PUBDIR + htmlf + ".html", title: post.title, subtitle: post.subtitle})
 	}
 
 	var indices []string
 
-	dates := make([]string, 0, len(posts))
-
-	for k := range posts {
-		dates = append(dates, k)
-	}
-
-	sort.Strings(dates)	
+	sort.Slice(posts[:], func(i, j int) bool {
+  	return posts[i].date < posts[j].date
+	})
 
 	path := TEMPDIR + "post-card.html"
 	templateRaw, err := os.ReadFile(path)
 
-	for _, v := range dates {
-		post := posts[v]
+	for _, v := range posts {
+		post := v
 		str := string(templateRaw[:])
 		str = strings.Replace(str, "{{slug}}", post.slug, 1)
 		str = strings.Replace(str, "{{title}}", post.title, 1)
 		str = strings.Replace(str, "{{subtitle}}", post.subtitle, 1)
-		str = strings.Replace(str, "{{date}}", v, 1)
-		// str := `
-		// <div>
-		// <a href="` + PUBDIR + post.slug + `">
-		// ` + "<h1>" + post.title + "</h1>" + `
-		// <h2>` + post.subtitle + "</h2>" + `
-		// <h2>` + v + "</h2>" + "\n</a></div>"
+		str = strings.Replace(str, "{{date}}", post.date, 1)
 		indices = append(indices, str)
 	}
 
-	fmt.Println(indices)
+	// fmt.Println(indices)
 
-	// path := TEMPDIR + template + ".html"
 	rawIndexTemplate, err := os.ReadFile(TEMPDIR + "index.html")
 	indexTemplate := string(rawIndexTemplate[:])
 	var str string
@@ -260,7 +249,6 @@ func Jennyrate() {
 
 	_, err = file.WriteString(indexTemplate)
 	report(err)
-	// log.Info("Wrote", "file", path+"!")
 }
 
 const helpMessage = `
@@ -271,20 +259,21 @@ this is help text :), use 'jenny build' to build your site!`;
 
 
 func main() {
-	for _, s := range os.Args[1:] {
-		switch s {
-			case "build":
-				fmt.Println("Building...")
-				Jennyrate()
-			case "help":
-				fmt.Println(helpMessage)
+	for i, s := range os.Args {
+		if i >= 1 {
+			switch s {
+				case "build":
+					fmt.Println("Building...")
+					Jennyrate()
+				case "help":
+					fmt.Println(helpMessage)
 
-			default:
-				fmt.Println("no commands found")
+				default:
+					fmt.Println("no commands found")
+			}
+		} else {
+			fmt.Println("no commands found, executing build command")
+			Jennyrate();
 		}
 	}
-	// buildPtr := flag.Bool("v", false, "verbose");
-	// flag.Parse();
-	// fmt.Println("verbose: ", *buildPtr)
-	// defer Jennyrate()
 }
