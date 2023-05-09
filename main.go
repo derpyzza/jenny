@@ -180,6 +180,7 @@ func TemplateFile(post Post, template string) (string, error) {
 func Jennyrate() {
 
 	files := GetSourceFiles()
+	fmt.Println(files);
 	posts := []indexData{}
 
 	for _, f := range files {
