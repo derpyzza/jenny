@@ -1,5 +1,3 @@
-*
-!.gitignore
-!jenny.py
-!README.md
-!LICENSE
+assets/
+posts/
+main.css
