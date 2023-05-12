@@ -67,7 +67,7 @@ posts = []
 if not os.path.exists( 'public' ):
     os.mkdir( 'public' )
 
-for f in glob.iglob( 'src/*.md' ):
+for f in glob.iglob( 'src/**/*.md', recursive=True):
     post = {}
     ids = []
     template = open('assets/template.html', 'r').read()
