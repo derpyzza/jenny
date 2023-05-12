@@ -25,51 +25,43 @@ def preprocess_file(file):
         #           the main page
     content=''
     title=''
+    title_id=''
     subtitle=''
     date=''
     for line in file:
         stripped = line.lstrip()
 
-        if stripped.startswith('$'):
-            command,_,args = stripped.rstrip('\n').lstrip('$').partition(' ')
+        if stripped.startswith('@'):
+            command,_,args = stripped.rstrip('\n').lstrip('@').partition(' ')
             args = args.strip()
 
-            if command == 'title':
-                title = args
-            elif command == 'date':
+            if command == 'date':
                 date = args
             elif command == 'subtitle':
                 subtitle = args
         elif stripped.startswith('\\'):
             content += stripped[2:]
+        elif stripped.startswith('# '):
+            title = stripped.rstrip('\n').lstrip('# ').lstrip(' ')
+            title_id = title.replace(" ", "-").lower()
         elif stripped.startswith('##'):
             data = stripped.rstrip('\n').lstrip('##').lstrip(' ')
             id = data.replace(" ", "-").lower()
-            content += "<h2 id=\"" + id + "\">" + data + "</h2>"
+            content += "<h2 id=\"" + id + "\"> <a href=\"#" + id + "\">" + data + "</a></h2>"
             ids.append({"id": id, "data": data})
 
         else:
             content += line
-    return {"content": content, "title": title, "subtitle": subtitle, "date": date}
+    return {"content": content, "title": title, "title_id": title_id, "date": date, "subtitle": subtitle}
 # PREPROCES FILE END
 
 def format_file(post, template):
     template = template.replace("{{content}}", post['content'])
     template = template.replace("{{title}}", post['title'])
     template = template.replace("{{subtitle}}", post['subtitle'])
+    template = template.replace("{{title_id}}", post['title_id'])
     template = template.replace("{{date}}", post['date'])
     return template
-
-def generate_index(post, ids):
-    if ids == []:
-        return post
-    index = "<div class=\"index\">\n<h3>Index</h3>\n<ul>"
-    for id in ids:
-        print(id["id"])
-        index += "<li><a href=\"#" + id["id"] + "\">" + id["data"] + "</a></li>\n"
-    index += "</ul></div>"
-    post["content"] = index + post["content"]
-    return post
 
 posts = []
 if not os.path.exists( 'public' ):
@@ -81,8 +73,7 @@ for f in glob.iglob( 'src/*.md' ):
     template = open('assets/template.html', 'r').read()
     with open( f, 'r' ) as file:
         post = preprocess_file(file)
-        post = generate_index(post, ids)
-        post['content'] = markdown.markdown( post["content"], extensions=[ 'extra', 'codehilite', 'toc', 'superscript'] )
+        post['content'] = markdown.markdown( post["content"] )
 
     file_name = os.path.basename( f )
     destination = os.path.join( "public", os.path.splitext( file_name )[ 0 ] + ".html" )
@@ -97,12 +88,15 @@ index = open('assets/index_template.html', 'r').read()
 content = ''
 
 for post in posts:
-    content += "<a href=\"" + post['dest'] + "\" class=\"post\">"
-    content += "<div class=\"content\">" + "<div class=\"post-title\">"
-    content += "<h2>" + post['title'] + "</h2>"
-    content += "<h4>" + post['date'] + "</h4>"
-    content += "</div> <p>" + post['subtitle'] + "</p> </div> </a>"
+    content += "<div class=\"post\">"
+    content += "<span>" + post['date'] + "</span>"
+    content += "<a href=\"" + post['dest'] + "#main\">"
+    content += post['title']
+    content += "</a></div>"
 
 with open ('index.html', 'w') as file:
+    index = index.replace("{{title}}", posts[0]['title'])
+    index = index.replace("{{date}}", posts[0]['date'])
+    index = index.replace("{{latest}}", posts[0]['content'])
     index = index.replace("{{posts}}", content)
     file.write(index)
