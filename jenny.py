@@ -52,7 +52,7 @@ def preprocess_file(file):
 
         else:
             content += line
-    return {"content": content.lower(), "title": title, "title_id": title_id, "date": date, "subtitle": subtitle}
+    return {"content": content, "title": title, "title_id": title_id, "date": date, "subtitle": subtitle}
 # PREPROCES FILE END
 
 def format_file(post, template):
