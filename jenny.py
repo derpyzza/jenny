@@ -97,6 +97,7 @@ for post in posts:
 with open ('index.html', 'w') as file:
     index = index.replace("{{title}}", posts[0]['title'])
     index = index.replace("{{date}}", posts[0]['date'])
+    index = index.replace("{{subtitle}}", posts[0]['subtitle'])
     index = index.replace("{{latest}}", posts[0]['content'])
     index = index.replace("{{posts}}", content)
     file.write(index)
