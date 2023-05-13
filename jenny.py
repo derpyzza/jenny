@@ -87,7 +87,7 @@ for f in glob.iglob( 'src/**/*.md', recursive=True):
 index = open('assets/index_template.html', 'r').read()
 content = ''
 
-for post in posts:
+for post in reversed(posts):
     content += "<div class=\"post\">"
     content += "<span>" + post['date'] + "</span>"
     content += "<a href=\"" + post['dest'] + "#main\">"
@@ -95,9 +95,9 @@ for post in posts:
     content += "</a></div>"
 
 with open ('index.html', 'w') as file:
-    index = index.replace("{{title}}", posts[0]['title'])
-    index = index.replace("{{date}}", posts[0]['date'])
-    index = index.replace("{{subtitle}}", posts[0]['subtitle'])
-    index = index.replace("{{latest}}", posts[0]['content'])
+    index = index.replace("{{title}}", posts[-1]['title'])
+    index = index.replace("{{date}}", posts[-1]['date'])
+    index = index.replace("{{subtitle}}", posts[-1]['subtitle'])
+    index = index.replace("{{latest}}", posts[-1]['content'])
     index = index.replace("{{posts}}", content)
     file.write(index)
