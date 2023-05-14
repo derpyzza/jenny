@@ -20,3 +20,7 @@ $ mkdir assets/ public/ src/
 `public/` is where all your outputted html files shall reside.
 
 that is all. enjoy :)
+
+## TODO
+
+- [ ] Add some way to split posts apart based off of date e.g `0523 = [ post_1, post_2] # All posts of May 2023`

@@ -50,7 +50,7 @@ def format_file(post, template):
     template = template.replace("{{title}}", post['title'])
     template = template.replace("{{subtitle}}", post['subtitle'])
     template = template.replace("{{title_id}}", post['title_id'])
-    template = template.replace("{{date}}", post['date'])
+    template = template.replace("{{date}}", post['date'].replace('-', '.'))
     return template
 
 posts = []
