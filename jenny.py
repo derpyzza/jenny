@@ -14,15 +14,6 @@ import commonmark
 # DOING generate an index using all the title ids
 
 def preprocess_file(file):
-        # preprocess the file for metadata. 
-        # metadata in this implementation just starts with a "$" symbol, followed by a command name and command args
-        # current commands are:
-        #
-        # title:    the document title, to be displayed at the top of the document and also on the main page to represent
-        #           the corresponding blog page
-        # subtitle: same as title, but smaller and longer. kind of a summary in a way.
-        # date:     the date on which the post was published or written. to be displayed at the top of the document and also
-        #           the main page
     content=''
     title=''
     title_id=''
@@ -48,7 +39,6 @@ def preprocess_file(file):
             data = stripped.rstrip('\n').lstrip('##').lstrip(' ')
             id = data.replace(" ", "-").lower()
             content += "<h2 id=\"" + id + "\"> <a href=\"#" + id + "\">" + data + "</a></h2>"
-            ids.append({"id": id, "data": data})
 
         else:
             content += line
@@ -67,37 +57,41 @@ posts = []
 if not os.path.exists( 'public' ):
     os.mkdir( 'public' )
 
-for f in glob.iglob( 'src/**/*.md', recursive=True):
-    post = {}
-    ids = []
-    template = open('assets/template.html', 'r').read()
-    with open( f, 'r' ) as file:
-        post = preprocess_file(file)
-        post['content'] = markdown.markdown( post["content"] )
+def process_posts():
+    for f in glob.iglob( 'src/**/*.md', recursive=True):
+        post = {}
+        template = open('assets/template.html', 'r').read()
+        with open( f, 'r' ) as file:
+            post = preprocess_file(file)
+            post['content'] = markdown.markdown( post["content"] )
 
-    file_name = os.path.basename( f )
-    destination = os.path.join( "public", os.path.splitext( file_name )[ 0 ] + ".html" )
-    post["dest"] = destination
+        file_name = os.path.basename( f )
+        destination = os.path.join( "public", os.path.splitext( file_name )[ 0 ] + ".html" )
+        post["dest"] = destination
 
-    with open( destination, 'w' ) as file:
-        template = format_file(post, template)
-        file.write(template)
-    posts.append(post)
+        with open( destination, 'w' ) as file:
+            template = format_file(post, template)
+            file.write(template)
+        posts.append(post)
 
-index = open('assets/index_template.html', 'r').read()
-content = ''
+def process_index():
+    index = open('assets/index_template.html', 'r').read()
+    content = ''
 
-for post in reversed(posts):
-    content += "<div class=\"post\">"
-    content += "<span>" + post['date'] + "</span>"
-    content += "<a href=\"" + post['dest'] + "#main\">"
-    content += post['title']
-    content += "</a></div>"
+    for post in reversed(posts):
+        content += "<div class=\"post\">"
+        content += "<span>" + post['date'] + "</span>"
+        content += "<a href=\"" + post['dest'] + "#main\">"
+        content += post['title']
+        content += "</a></div>"
 
-with open ('index.html', 'w') as file:
-    index = index.replace("{{title}}", posts[-1]['title'])
-    index = index.replace("{{date}}", posts[-1]['date'])
-    index = index.replace("{{subtitle}}", posts[-1]['subtitle'])
-    index = index.replace("{{latest}}", posts[-1]['content'])
-    index = index.replace("{{posts}}", content)
-    file.write(index)
+    with open ('index.html', 'w') as file:
+        index = index.replace("{{title}}", posts[-1]['title'])
+        index = index.replace("{{date}}", posts[-1]['date'])
+        index = index.replace("{{subtitle}}", posts[-1]['subtitle'])
+        index = index.replace("{{latest}}", posts[-1]['content'])
+        index = index.replace("{{posts}}", content)
+        file.write(index)
+
+process_posts()
+process_index()
