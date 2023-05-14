@@ -1,7 +1,15 @@
-# jenny
-small static site generator mostly for my personal use
-i wrote a blog post about it [here](https://derpyzza.github.io/public/01_about-jenny.html)
+# About
+
+ jenny 2.0, composed up of three parts:
+
+ - jeh, the markdown parser.
+ - hnn, the html templating system. 
+ - nee, the html renderer
 
 # Usage
 
 # Installation
+
+# Build
+
+# Contribute
