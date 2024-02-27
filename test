@@ -1,0 +1,6 @@
+#! /bin/python
+# -*- mode: c -*-
+
+#define print(_, ...) printf(_, __VA_ARGS__)
+
+print("Hello this is a test :)")
