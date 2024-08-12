@@ -71,18 +71,13 @@ def preprocess_file(file):
         if stripped.startswith('@') and keep_scanning:
             command,_,args = stripped.rstrip('\n').lstrip('@').partition(' ')
             args = args.strip().split(',')
-
             vars[command] = args
-            # print("cmd: ", vars[command])
         elif stripped.startswith("---"):
-            # print("BREAK")
             keep_scanning = False
             continue
         else: 
             vars['post_content'] += line;
-
     return vars
-# PREPROCES FILE END
 
 def format_file(post, template):
     template = template.replace("{{content}}", post['post_content'])
@@ -109,12 +104,8 @@ def process_posts():
         post["dest"] = destination
         destination.rstrip(".md")
 
-        # if the current file is a list file rather than a post file.
+        # skip file if the current file is a list file rather than a post file.
         if f.lstrip(src_dir+"/").rstrip(".md") in config["list_files"]:
-            print(f"creating file {destination}...")
-            with open( destination, 'w' ) as file:
-                file.write("")
-                file.close()
             continue
 
         print(f"creating file {destination}...")
@@ -124,25 +115,30 @@ def process_posts():
         posts.append(post)
 
 
-def process_index(file):
+def process_index(file: str):
 
     # list index template file.
     index = open(f'{res_dir}/{config["list_template"]}', 'r').read()
-    content = ''
+    content = open(f'{src_dir}/{file}.md', 'r').read()
+    content = markdown.markdown(content)
+    list = ''
     year = "0"
+    file_name = f"{out_dir}/{file}.html"
 
     for post in reversed(posts):
         if not ("".join(post['post_date']).split('-')[0] == year):
             year = "".join(post['post_date']).split('-')[0]
-            content += "20" + year
-        content += "<li>"
-        content += "<a href=\"" + post['dest'] + "#main\">"
-        content += "".join(post['post_title'])
-        content += "</a></li>"
+            list += "20" + year
+        list += "<li>"
+        list += "<a href=\"/" + post['dest'] + "#main\">"
+        list += "".join(post['post_title'])
+        list += "</a></li>"
 
     print(f"creating file {file}...")
-    with open (file, 'w') as f:
-        index = index.replace("{{posts}}", content)
+    with open (file_name, 'w') as f:
+        index = index.replace("{{posts}}", list)
+        index = index.replace("{{content}}", content)
+        index = index.replace("{{title}}", file.capitalize())
         f.write(index)
 
 
@@ -181,7 +177,7 @@ else:
             process_posts()
             for f in config["list_files"]:
                 print(f"processing {f}...")
-                process_index(f"{out_dir}/{f}.html")
+                process_index(f)
         case "new-post":
             print("Input a name for your post:")
             name = input()
