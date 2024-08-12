@@ -122,13 +122,23 @@ def process_index(file: str):
     content = open(f'{src_dir}/{file}.md', 'r').read()
     content = markdown.markdown(content)
     list = ''
-    year = "0"
+    last_year = "0"
     file_name = f"{out_dir}/{file}.html"
 
-    for post in reversed(posts):
-        if not ("".join(post['post_date']).split('-')[0] == year):
-            year = "".join(post['post_date']).split('-')[0]
-            list += "20" + year
+    for post in posts:
+        year = "".join(post['post_date']).split('.')[0]
+        print("THIS IS VAR", year)
+        if not (year == last_year):
+            # Nasty little hack, but i have a slight headache and i'm losing 
+            # my will to keep working on this script anymore today.
+            # ( he says as if he wouldn't put in nasty little hacks in his code otherwise )
+            if last_year == "0":
+                head = "<br><br>"
+            else:
+                head = "<br><hr><br>"
+            last_year = year
+            # Yes, this script is expected to only run in the 21st century.
+            list += f"{head}<h3>20{last_year}<h3>"
         list += "<li>"
         list += "<a href=\"/" + post['dest'] + "#main\">"
         list += "".join(post['post_title'])
@@ -143,7 +153,7 @@ def process_index(file: str):
 
 
 def create_new_post(name: str):
-    today = date.today().strftime("%Y-%m-%d")
+    today = date.today().strftime("%y.%m.%d")
     
     if name:
         post = today + "-" + name + ".md"
