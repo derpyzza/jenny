@@ -89,7 +89,9 @@ def format_file(post, template):
 posts = []
 
 def process_posts():
-    for f in glob.iglob( f"{src_dir}/**/*.md", recursive=True):
+    # Globbed files are unsorted >:[
+    post_list = sorted(glob.glob(f"{src_dir}/**/*.md", recursive=True))
+    for f in post_list:
         post = {}
 
         # Read and preprocess the source file.
@@ -125,9 +127,8 @@ def process_index(file: str):
     last_year = "0"
     file_name = f"{out_dir}/{file}.html"
 
-    for post in posts:
+    for post in reversed(posts):
         year = "".join(post['post_date']).split('.')[0]
-        print("THIS IS VAR", year)
         if not (year == last_year):
             # Nasty little hack, but i have a slight headache and i'm losing 
             # my will to keep working on this script anymore today.
@@ -137,8 +138,7 @@ def process_index(file: str):
             else:
                 head = "<br><hr><br>"
             last_year = year
-            # Yes, this script is expected to only run in the 21st century.
-            list += f"{head}<h3>20{last_year}<h3>"
+            list += f"{head}<h3>{last_year}<h3>"
         list += "<li>"
         list += "<a href=\"/" + post['dest'] + "#main\">"
         list += "".join(post['post_title'])
@@ -153,10 +153,10 @@ def process_index(file: str):
 
 
 def create_new_post(name: str):
-    today = date.today().strftime("%y.%m.%d")
+    today = date.today().strftime("%Y.%m.%d")
     
     if name:
-        post = today + "-" + name + ".md"
+        post = today.replace(".", "").removeprefix("20") + "-" + name + ".md"
     else:
         name = "[title]"
         post = today + ".md"
