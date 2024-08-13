@@ -4,73 +4,46 @@ import os
 import sys
 import glob
 import markdown
-import json
 from datetime import date
 
-config = {}
-# for ease of access.
-src_dir = ""
-out_dir = ""
-res_dir = ""
+src_dir = "src"
+out_dir = "public"
+res_dir = "assets"
+list_template = "index_template.html"
+post_template = "template.html"
+list_files = ['archive']
 
-# checks for and creates a config file.
-cfg_file = "config_jenny.json"
-if not os.path.exists(cfg_file):
-    print("No jenny project detected, create a new one? (Y/n)")
-    x = input()
-    if x == 'n' or x == 'N':
-        exit()
-    opts = {
-        "src_dir": "src",
-        "out_dir": "public",
-        "res_dir": "assets",
-        "list_template": "index_template.html",
-        "post_template": "template.html",
-
-        "list_files": [
-            'archive'
-        ], #trailing comma wooooo
-    }
-
-    print("creating config file...")
-    f = open(cfg_file, "w")
-    f.write(json.dumps(opts))
-    f.close()
-    config = opts
-
-    print("done! enjoy your new blog!")
-else:
-    f = open(cfg_file, "r").read()
-    config = json.loads(f)
-
-if not config["list_template"].endswith(".html"):
-    config["list_template"] = config["list_template"] + ".html"
-if not config["post_template"].endswith(".html"):
-    config["post_template"] = config["post_template"] + ".html"
-src_dir = config["src_dir"]
-out_dir = config["out_dir"]
-res_dir = config["res_dir"]
+if not list_template.endswith(".html"):
+    list_template = list_template + ".html"
+if not post_template.endswith(".html"):
+    post_template = post_template + ".html"
 
 if not os.path.exists(src_dir):
-    print(f"creating input dir [{src_dir}]...")
+    print(f"creating input dir {src_dir}/...")
     os.mkdir( src_dir )
 if not os.path.exists( out_dir ):
-    print(f"creating output dir [{out_dir}]...")
+    print(f"creating output dir {out_dir}/...")
     os.mkdir( out_dir )
 
 
 # extract any variables in a file.
 def preprocess_file(file):
     vars = {
-            "post_content": ""
-            }
+        "post_content": "",
+        "file_name": file,
+    }
     keep_scanning = True
     for line in file:
         stripped = line.lstrip()
  
         if stripped.startswith('@') and keep_scanning:
             command,_,args = stripped.rstrip('\n').lstrip('@').partition(' ')
-            args = args.strip().split(',')
+            args = args.strip().split('+')
+
+            # If only one item in list just convert it into a string
+            if len(args) == 1:
+                args = "".join(args)
+
             vars[command] = args
         elif stripped.startswith("---"):
             keep_scanning = False
@@ -80,10 +53,21 @@ def preprocess_file(file):
     return vars
 
 def format_file(post, template):
-    template = template.replace("{{content}}", post['post_content'])
-    template = template.replace("{{title}}", "".join(post['post_title']))
-    template = template.replace("{{subtitle}}", "".join(post['post_subtitle']))
-    template = template.replace("{{date}}", "".join(post['post_date']).replace('-', '.'))
+
+    # Necessary for every post
+    # TODO error handling.
+    try:
+        template = template.replace("{{title}}", post['post_title'])
+        template = template.replace("{{content}}", post['post_content'])
+        template = template.replace("{{date}}", post['post_date'].replace('-', '.'))
+    except:
+        print(f"Error processing file {post["file_name"]}")
+        exit()
+
+    if "post_subtitle" in post:
+        template = template.replace("{{subtitle}}", f"<h4><span>{post['post_subtitle']}</span></h4>")
+    else:
+        template = template.replace("{{subtitle}}", "")
     return template
 
 posts = []
@@ -96,7 +80,7 @@ def process_posts():
 
         # Read and preprocess the source file.
         print(f"generating {f}...")
-        template = open(f"{res_dir}/{config["post_template"]}", 'r').read()
+        template = open(f"{res_dir}/{post_template}", 'r').read()
         with open( f, 'r' ) as file:
             post = preprocess_file(file)
             post['post_content'] = markdown.markdown( post["post_content"] )
@@ -107,7 +91,7 @@ def process_posts():
         destination.rstrip(".md")
 
         # skip file if the current file is a list file rather than a post file.
-        if f.lstrip(src_dir+"/").rstrip(".md") in config["list_files"]:
+        if f.lstrip(src_dir+"/").rstrip(".md") in list_files:
             continue
 
         print(f"creating file {destination}...")
@@ -120,7 +104,7 @@ def process_posts():
 def process_index(file: str):
 
     # list index template file.
-    index = open(f'{res_dir}/{config["list_template"]}', 'r').read()
+    index = open(f'{res_dir}/{list_template}', 'r').read()
     content = open(f'{src_dir}/{file}.md', 'r').read()
     content = markdown.markdown(content)
     list = ''
@@ -165,7 +149,7 @@ def create_new_post(name: str):
         f.write(f"""@post_title {name}
 @post_date {today}
 @post_subtitle [post_subtitle]
-@post_tags tag1, tag2
+@post_tags tag1 + tag2
 ---
 
 # {name.capitalize()}
@@ -185,7 +169,7 @@ else:
     match sys.argv[1]:
         case "build":
             process_posts()
-            for f in config["list_files"]:
+            for f in list_files:
                 print(f"processing {f}...")
                 process_index(f)
         case "new-post":
